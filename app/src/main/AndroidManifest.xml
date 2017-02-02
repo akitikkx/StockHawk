@@ -37,6 +37,19 @@
             android:enabled="true"
             android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
+
+        <!-- Stock Collection Widget -->
+        <receiver
+            android:name=".widget.StockCollectionProvider"
+            android:label="@string/widget_collection_title"
+            android:enabled="true" >
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.udacity.stockhawk.ACTION_DATA_UPDATED" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_collection_info" />
+        </receiver>
     </application>
 
 </manifest>
