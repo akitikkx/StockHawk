@@ -111,14 +111,14 @@ public final class QuoteSyncJob {
                             Contract.Quote.URI,
                             quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
 
-            updateWidget(context);
+            updateWidgets(context);
 
         } catch (IOException | NullPointerException exception) {
             Timber.e(exception, "Error fetching stock quotes");
         }
     }
 
-    public static void updateWidget(Context context) {
+    public static void updateWidgets(Context context) {
         Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
         context.sendBroadcast(dataUpdatedIntent);
     }
