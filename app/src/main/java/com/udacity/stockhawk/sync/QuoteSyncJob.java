@@ -104,9 +104,6 @@ public final class QuoteSyncJob {
 
                     quoteCVs.add(quoteCV);
                 }
-
-
-
             }
 
             context.getContentResolver()
@@ -114,12 +111,16 @@ public final class QuoteSyncJob {
                             Contract.Quote.URI,
                             quoteCVs.toArray(new ContentValues[quoteCVs.size()]));
 
-            Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
-            context.sendBroadcast(dataUpdatedIntent);
+            updateWidget(context);
 
         } catch (IOException | NullPointerException exception) {
             Timber.e(exception, "Error fetching stock quotes");
         }
+    }
+
+    public static void updateWidget(Context context) {
+        Intent dataUpdatedIntent = new Intent(ACTION_DATA_UPDATED);
+        context.sendBroadcast(dataUpdatedIntent);
     }
 
     private static void schedulePeriodic(Context context) {
