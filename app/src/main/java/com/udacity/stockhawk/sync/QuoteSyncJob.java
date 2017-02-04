@@ -6,13 +6,19 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.preference.PreferenceManager;
+import android.support.annotation.IntDef;
 
+import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -37,6 +43,16 @@ public final class QuoteSyncJob {
     private static final int PERIODIC_ID = 1;
     private static final int YEARS_OF_HISTORY = 2;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({STOCK_STATUS_OK, STOCK_STATUS_SERVER_DOWN, STOCK_STATUS_SERVER_INVALID, STOCK_STATUS_UNKNOWN, STOCK_STATUS_INVALID})
+    public @interface StockStatus{}
+
+    public static final int STOCK_STATUS_OK = 0;
+    public static final int STOCK_STATUS_SERVER_DOWN = 2;
+    public static final int STOCK_STATUS_SERVER_INVALID = 3;
+    public static final int STOCK_STATUS_UNKNOWN = 4;
+    public static final int STOCK_STATUS_INVALID = 5;
+
     private QuoteSyncJob() {
     }
 
@@ -58,6 +74,7 @@ public final class QuoteSyncJob {
             Timber.d(stockCopy.toString());
 
             if (stockArray.length == 0) {
+                setStockStatus(context, STOCK_STATUS_SERVER_DOWN);
                 return;
             }
 
@@ -103,6 +120,8 @@ public final class QuoteSyncJob {
                     quoteCV.put(Contract.Quote.COLUMN_HISTORY, historyBuilder.toString());
 
                     quoteCVs.add(quoteCV);
+                } else {
+                    setStockStatus(context, STOCK_STATUS_INVALID);
                 }
             }
 
@@ -114,6 +133,7 @@ public final class QuoteSyncJob {
             updateWidgets(context);
 
         } catch (IOException | NullPointerException exception) {
+            setStockStatus(context, STOCK_STATUS_SERVER_INVALID);
             Timber.e(exception, "Error fetching stock quotes");
         }
     }
@@ -173,5 +193,11 @@ public final class QuoteSyncJob {
         }
     }
 
+    static private void setStockStatus(Context context, @StockStatus int stockStatus) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(context.getString(R.string.pref_stock_status_key), stockStatus);
+        editor.commit();
+    }
 
 }

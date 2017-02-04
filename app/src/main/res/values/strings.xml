@@ -17,6 +17,7 @@
     <string name="default_stocks_microsoft" translatable="false">MSFT</string>
     <string name="default_stocks_facebook" translatable="false">FB</string>
 
+    <string name="pref_stock_status_key" translatable="false">stock-status</string>
 
     <string name="action_change_units" translatable="false">@string/pref_display_mode_key</string>
 
@@ -26,6 +27,11 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dialog_add">Add</string>
 
+    <!-- Empty messages -->
+    <string name="empty_stock_list">There is no stock information available</string>
+    <string name="empty_stock_list_network_error">There is no stock information available due to no network connectivity. Will load stock cursor when the network is available.</string>
+    <string name="empty_stock_list_server_down">There is no stock information available. The server is not returning any data.</string>
+    <string name="empty_stock_list_invalid_stock">There is no stock information available. The server did not recognize the stock symbol provided.</string>
     <string name="error_no_network">No network connectivity! Will load stock cursor when the network is available.</string>
     <string name="error_no_stocks">No stocks added! Hit the floating action button to add one.</string>
 

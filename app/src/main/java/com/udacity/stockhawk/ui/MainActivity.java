@@ -1,6 +1,7 @@
 package com.udacity.stockhawk.ui;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -30,7 +31,7 @@ import butterknife.ButterKnife;
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor>,
-        SwipeRefreshLayout.OnRefreshListener,
+        SwipeRefreshLayout.OnRefreshListener, SharedPreferences.OnSharedPreferenceChangeListener,
         StockAdapter.StockAdapterOnClickHandler {
 
     private static final int STOCK_LOADER = 0;
@@ -86,8 +87,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 QuoteSyncJob.updateWidgets(MainActivity.this);
             }
         }).attachToRecyclerView(stockRecyclerView);
+    }
 
 
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        if (s.equals(getString(R.string.pref_stock_status_key))) {
+            updateEmptyView();
+        }
     }
 
     private boolean networkUp() {
@@ -97,6 +105,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 
+    /**
+     * Updates the error message with the relevant error from the sync
+     */
+    private void updateEmptyView() {
+        if (adapter.getItemCount() == 0) {
+            TextView tv = (TextView) findViewById(R.id.error);
+            if (null != tv) {
+                // if cursor is empty, why? do we have an invalid location
+                int message = R.string.empty_stock_list;
+                @QuoteSyncJob.StockStatus int stock = PrefUtils.getStockStatus(this);
+                switch (stock) {
+                    case QuoteSyncJob.STOCK_STATUS_SERVER_DOWN:
+                        message = R.string.empty_stock_list_server_down;
+                        break;
+                    case QuoteSyncJob.STOCK_STATUS_INVALID:
+                        message = R.string.empty_stock_list_invalid_stock;
+                        break;
+                    default:
+                        if (!networkUp()) {
+                            message = R.string.empty_stock_list_network_error;
+                        }
+                }
+                tv.setText(message);
+                error.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
     @Override
     public void onRefresh() {
 
@@ -104,11 +140,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
         if (!networkUp() && adapter.getItemCount() == 0) {
             swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_network));
-            error.setVisibility(View.VISIBLE);
-        } else if (!networkUp()) {
-            swipeRefreshLayout.setRefreshing(false);
-            Toast.makeText(this, R.string.toast_no_connectivity, Toast.LENGTH_LONG).show();
+            updateEmptyView();
         } else if (PrefUtils.getStocks(this).size() == 0) {
             swipeRefreshLayout.setRefreshing(false);
             error.setText(getString(R.string.error_no_stocks));

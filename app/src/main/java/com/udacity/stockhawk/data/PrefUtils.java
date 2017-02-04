@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 import com.udacity.stockhawk.R;
+import com.udacity.stockhawk.sync.QuoteSyncJob;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -86,6 +87,14 @@ public final class PrefUtils {
         }
 
         editor.apply();
+    }
+
+    @SuppressWarnings("ResourceType")
+    static public
+    @QuoteSyncJob.StockStatus
+    int getStockStatus(Context c) {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(c);
+        return sp.getInt(c.getString(R.string.pref_stock_status_key), QuoteSyncJob.STOCK_STATUS_UNKNOWN);
     }
 
 }
