@@ -105,8 +105,9 @@ public final class QuoteSyncJob {
 
                     for (HistoricalQuote it : history) {
                         historyBuilder.append(it.getDate().getTimeInMillis());
-                        historyBuilder.append(",");
+                        historyBuilder.append(":");
                         historyBuilder.append(it.getClose());
+                        historyBuilder.append("\n");
                     }
 
                     ContentValues quoteCV = new ContentValues();

@@ -28,6 +28,7 @@ import com.udacity.stockhawk.data.Contract;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -98,18 +99,26 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             mSymbol.setText(symbol);
             mPrice.setText(dollarFormat.format(data.getFloat(Contract.Quote.POSITION_PRICE)));
 
-            String[] history = stockHistory.split(",");
+            // add the individual stock items to an array to further split them
+            // currently each stock and date row is separated by a new line \n
+            String[] historyItems = stockHistory.split("\\n");
 
-            for (int i = 0; i < history.length; i++) {
-                stockDates.add(Float.valueOf(history[0]));
-                stockValues.add(Float.valueOf(history[i]));
+            for (String stockItem: historyItems) {
+                // string array for holding the stock and date row
+                // left value being the date and right value being the stock value
+                String[] stockAndValue = stockItem.split(":");
+                // the date
+                stockDates.add(Float.valueOf(stockAndValue[0]));
+                // the stock value
+                stockValues.add(Float.valueOf(stockAndValue[1]));
             }
 
+            Collections.reverse(stockDates);
+            Collections.reverse(stockValues);
             Float date = stockDates.get(0);
 
-            stockDates.remove(0);
-            stockValues.remove(0);
-
+            // create a entry pair of date and stock value to be used for the x and y
+            // respectively
             for (int i = 0; i < stockDates.size(); i++) {
                 stockEntries.add(new Entry(stockDates.get(i) - date, stockValues.get(i)));
             }
@@ -118,6 +127,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             lineChartDescription.setText(symbol);
             mLineChart.setDescription(lineChartDescription);
 
+            // configuring the line data set
             LineDataSet lineDataSet = new LineDataSet(stockEntries, "");
             lineDataSet.setColor(R.color.chart_line_color);
             lineDataSet.setLineWidth(1f);
@@ -130,6 +140,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             LineData lineData = new LineData(lineDataSet);
             mLineChart.setData(lineData);
 
+            // configuring the y axis
             YAxis yAxisRight = mLineChart.getAxisRight();
             yAxisRight.setEnabled(false);
 
@@ -141,6 +152,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             yAxis.setDrawZeroLine(true);
             yAxis.setAxisLineColor(R.color.chart_line_color);
 
+            // configuring the x axis
             XAxis xAxisConfig = mLineChart.getXAxis();
             xAxisConfig.setTextColor(R.color.chart_line_color);
             xAxisConfig.setDrawGridLines(false);
