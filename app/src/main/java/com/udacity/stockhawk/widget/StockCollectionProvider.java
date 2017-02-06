@@ -16,10 +16,6 @@ import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.sync.QuoteSyncJob;
 import com.udacity.stockhawk.ui.MainActivity;
 
-/**
- * Created by Ahmed on 2017/02/01.
- */
-
 public class StockCollectionProvider extends AppWidgetProvider {
 
     @Override

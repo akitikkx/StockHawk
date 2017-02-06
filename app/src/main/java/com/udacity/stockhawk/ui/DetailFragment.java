@@ -24,6 +24,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
+import com.udacity.stockhawk.data.PrefUtils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -35,6 +36,9 @@ import java.util.Locale;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.udacity.stockhawk.R.id.change;
+import static com.udacity.stockhawk.R.id.symbol;
+
 /**
  * Created by Ahmed on 2017/02/04.
  */
@@ -44,14 +48,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final String TAG = DetailFragment.class.getSimpleName();
     @BindView(R.id.line_chart)
     public LineChart mLineChart;
-    @BindView(R.id.symbol)
+    @BindView(symbol)
     TextView mSymbol;
     @BindView(R.id.price)
     TextView mPrice;
+    @BindView(change)
+    TextView mChange;
     public static final String DETAIL_URI = "URI";
     private static final int DETAIL_LOADER = 0;
     private Uri mUri;
     private DecimalFormat dollarFormat;
+    private DecimalFormat dollarFormatWithPlus;
+    private DecimalFormat percentageFormat;
 
     @Nullable
     @Override
@@ -67,6 +75,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         ButterKnife.bind(this, rootView);
 
         dollarFormat = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
+        dollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
+        dollarFormatWithPlus.setPositivePrefix("+$");
+        percentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
+        percentageFormat.setMaximumFractionDigits(2);
+        percentageFormat.setMinimumFractionDigits(2);
+        percentageFormat.setPositivePrefix("+");
 
         return rootView;
 
@@ -94,10 +108,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             List<Entry> stockEntries = new ArrayList<>();
 
             String symbol = data.getString(Contract.Quote.POSITION_SYMBOL);
+
+            // set the data for the current stock details area
+            setCurrentStockDetails(symbol, data);
+
             String stockHistory = data.getString(Contract.Quote.POSITION_HISTORY);
-            getActivity().setTitle(symbol);
-            mSymbol.setText(symbol);
-            mPrice.setText(dollarFormat.format(data.getFloat(Contract.Quote.POSITION_PRICE)));
 
             // add the individual stock items to an array to further split them
             // currently each stock and date row is separated by a new line \n
@@ -125,50 +140,79 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
             Description lineChartDescription = new Description();
             lineChartDescription.setText(symbol);
-            mLineChart.setDescription(lineChartDescription);
 
-            // configuring the line data set
-            LineDataSet lineDataSet = new LineDataSet(stockEntries, "");
-            lineDataSet.setColor(R.color.chart_line_color);
-            lineDataSet.setLineWidth(1f);
-            lineDataSet.setDrawValues(false);
-            lineDataSet.setHighLightColor(R.color.chart_line_color);
-            lineDataSet.setDrawHighlightIndicators(false);
-            lineDataSet.setDrawFilled(true);
-            lineDataSet.setFillColor(R.color.chart_line_color);
-
-            LineData lineData = new LineData(lineDataSet);
-            mLineChart.setData(lineData);
-
-            // configuring the y axis
-            YAxis yAxisRight = mLineChart.getAxisRight();
-            yAxisRight.setEnabled(false);
-
-            YAxis yAxis = mLineChart.getAxisLeft();
-            yAxis.setTextColor(R.color.chart_line_color);
-            yAxis.setDrawGridLines(false);
-            yAxis.setAxisLineWidth(1.5f);
-            yAxis.setTextSize(12f);
-            yAxis.setDrawZeroLine(true);
-            yAxis.setAxisLineColor(R.color.chart_line_color);
-
-            // configuring the x axis
-            XAxis xAxisConfig = mLineChart.getXAxis();
-            xAxisConfig.setTextColor(R.color.chart_line_color);
-            xAxisConfig.setDrawGridLines(false);
-            xAxisConfig.setAxisLineColor(R.color.chart_line_color);
-            xAxisConfig.setTextSize(13f);
-            xAxisConfig.setAxisLineWidth(2f);
-            xAxisConfig.setPosition(XAxis.XAxisPosition.BOTTOM);
-
-            Legend legend = mLineChart.getLegend();
-            legend.setEnabled(false);
-
-            mLineChart.animateX(1500, Easing.EasingOption.Linear);
-            mLineChart.setExtraOffsets(10, 0, 0, 10);
+            generateChart(stockEntries, lineChartDescription);
         }
 
     }
+
+    private void setCurrentStockDetails(String symbol, Cursor data)
+    {
+        float rawAbsoluteChange = data.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
+        float percentageChange = data.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
+        String percentage = percentageFormat.format(percentageChange / 100);
+
+        getActivity().setTitle(symbol);
+        mSymbol.setText(symbol);
+        mPrice.setText(dollarFormat.format(data.getFloat(Contract.Quote.POSITION_PRICE)));
+        if (rawAbsoluteChange > 0) {
+            mChange.setBackgroundResource(R.drawable.percent_change_pill_green);
+        } else {
+            mChange.setBackgroundResource(R.drawable.percent_change_pill_red);
+        }
+        if (PrefUtils.getDisplayMode(getActivity())
+                .equals(getActivity().getString(R.string.pref_display_mode_absolute_key))) {
+            mChange.setText(dollarFormatWithPlus.format(rawAbsoluteChange));
+        } else {
+            mChange.setText(percentage);
+        }
+    }
+
+    private void generateChart(List<Entry> stockEntries, Description description)
+    {
+        mLineChart.setDescription(description);
+
+        // configuring the line data set
+        LineDataSet lineDataSet = new LineDataSet(stockEntries, "");
+        lineDataSet.setColor(R.color.chart_line_color);
+        lineDataSet.setLineWidth(1f);
+        lineDataSet.setDrawValues(false);
+        lineDataSet.setHighLightColor(R.color.chart_line_color);
+        lineDataSet.setDrawHighlightIndicators(false);
+        lineDataSet.setDrawFilled(true);
+        lineDataSet.setFillColor(R.color.chart_line_color);
+
+        LineData lineData = new LineData(lineDataSet);
+        mLineChart.setData(lineData);
+
+        // configuring the y axis
+        YAxis yAxisRight = mLineChart.getAxisRight();
+        yAxisRight.setEnabled(false);
+
+        YAxis yAxis = mLineChart.getAxisLeft();
+        yAxis.setTextColor(R.color.chart_line_color);
+        yAxis.setDrawGridLines(false);
+        yAxis.setAxisLineWidth(1.5f);
+        yAxis.setTextSize(12f);
+        yAxis.setDrawZeroLine(true);
+        yAxis.setAxisLineColor(R.color.chart_line_color);
+
+        // configuring the x axis
+        XAxis xAxisConfig = mLineChart.getXAxis();
+        xAxisConfig.setTextColor(R.color.chart_line_color);
+        xAxisConfig.setDrawGridLines(false);
+        xAxisConfig.setAxisLineColor(R.color.chart_line_color);
+        xAxisConfig.setTextSize(13f);
+        xAxisConfig.setAxisLineWidth(2f);
+        xAxisConfig.setPosition(XAxis.XAxisPosition.BOTTOM);
+
+        Legend legend = mLineChart.getLegend();
+        legend.setEnabled(false);
+
+        mLineChart.animateX(1500, Easing.EasingOption.Linear);
+        mLineChart.setExtraOffsets(10, 0, 0, 10);
+    }
+
 
     @Override
     public void onLoaderReset(Loader loader) {

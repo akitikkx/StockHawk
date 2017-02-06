@@ -70,7 +70,9 @@ public class CollectionRemoteViewsService extends RemoteViewsService {
                 dollarFormatWithPlus = (DecimalFormat) NumberFormat.getCurrencyInstance(Locale.US);
                 dollarFormatWithPlus.setPositivePrefix("+$");
                 percentageFormat = (DecimalFormat) NumberFormat.getPercentInstance(Locale.getDefault());
-
+                percentageFormat.setMaximumFractionDigits(2);
+                percentageFormat.setMinimumFractionDigits(2);
+                percentageFormat.setPositivePrefix("+");
 
                 RemoteViews views = new RemoteViews(getPackageName(),
                         R.layout.widget_quote_collection_item);
