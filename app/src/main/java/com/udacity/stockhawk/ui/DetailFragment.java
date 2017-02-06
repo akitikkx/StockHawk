@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindColor;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -54,6 +55,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     TextView mPrice;
     @BindView(change)
     TextView mChange;
+    @BindColor(R.color.chart_line_color)
+    public int chartColor;
     public static final String DETAIL_URI = "URI";
     private static final int DETAIL_LOADER = 0;
     private Uri mUri;
@@ -152,7 +155,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         float percentageChange = data.getFloat(Contract.Quote.POSITION_PERCENTAGE_CHANGE);
         String percentage = percentageFormat.format(percentageChange / 100);
 
-        getActivity().setTitle(symbol);
+        getActivity().setTitle(String.format(getString(R.string.stock_detail_page_title), symbol));
         mSymbol.setText(symbol);
         mPrice.setText(dollarFormat.format(data.getFloat(Contract.Quote.POSITION_PRICE)));
         if (rawAbsoluteChange > 0) {
@@ -174,13 +177,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         // configuring the line data set
         LineDataSet lineDataSet = new LineDataSet(stockEntries, "");
-        lineDataSet.setColor(R.color.chart_line_color);
+        lineDataSet.setColor(chartColor);
         lineDataSet.setLineWidth(1f);
         lineDataSet.setDrawValues(false);
-        lineDataSet.setHighLightColor(R.color.chart_line_color);
         lineDataSet.setDrawHighlightIndicators(false);
         lineDataSet.setDrawFilled(true);
-        lineDataSet.setFillColor(R.color.chart_line_color);
 
         LineData lineData = new LineData(lineDataSet);
         mLineChart.setData(lineData);
@@ -190,18 +191,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         yAxisRight.setEnabled(false);
 
         YAxis yAxis = mLineChart.getAxisLeft();
-        yAxis.setTextColor(R.color.chart_line_color);
+        yAxis.setTextColor(chartColor);
         yAxis.setDrawGridLines(false);
         yAxis.setAxisLineWidth(1.5f);
         yAxis.setTextSize(12f);
         yAxis.setDrawZeroLine(true);
-        yAxis.setAxisLineColor(R.color.chart_line_color);
+        yAxis.setAxisLineColor(chartColor);
 
         // configuring the x axis
         XAxis xAxisConfig = mLineChart.getXAxis();
-        xAxisConfig.setTextColor(R.color.chart_line_color);
+        xAxisConfig.setTextColor(chartColor);
         xAxisConfig.setDrawGridLines(false);
-        xAxisConfig.setAxisLineColor(R.color.chart_line_color);
+        xAxisConfig.setAxisLineColor(chartColor);
         xAxisConfig.setTextSize(13f);
         xAxisConfig.setAxisLineWidth(2f);
         xAxisConfig.setPosition(XAxis.XAxisPosition.BOTTOM);
@@ -211,6 +212,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         mLineChart.animateX(1500, Easing.EasingOption.Linear);
         mLineChart.setExtraOffsets(10, 0, 0, 10);
+        mLineChart.getXAxis().setTextColor(chartColor);
     }
 
 
