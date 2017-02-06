@@ -23,6 +23,14 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.DetailActivity"
+            android:parentActivityName=".ui.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.DetailActivity" />
+        </activity>
+
         <service
             android:name=".sync.QuoteIntentService"
             android:exported="false" />
@@ -56,8 +64,6 @@
             android:name=".widget.CollectionRemoteViewsService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
-
-        <activity android:name=".ui.DetailActivity"></activity>
     </application>
 
 </manifest>
