@@ -7,9 +7,12 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.util.Pair;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -50,10 +53,14 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     private StockAdapter adapter;
 
     @Override
-    public void onClick(String symbol) {
+    public void onClick(String symbol, StockAdapter.StockViewHolder vh) {
         Intent stockDetail = new Intent(MainActivity.this, DetailActivity.class);
         stockDetail.setData(Contract.Quote.makeUriForStock(symbol));
-        startActivity(stockDetail);
+
+        ActivityOptionsCompat activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(this,
+                new Pair<View, String>(vh.symbol, getString(R.string.stock_detail_current_info_transition_name)));
+
+        ActivityCompat.startActivity(this, stockDetail, activityOptions.toBundle());
         Timber.d("Symbol clicked: %s", symbol);
     }
 

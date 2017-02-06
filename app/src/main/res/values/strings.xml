@@ -23,6 +23,8 @@
 
     <string name="stock_detail_page_title">%1$s weekly history</string>
 
+    <string name="stock_detail_current_info_transition_name" translatable="false">TN_Current_Stocks</string>
+
     <string name="dialog_title">Add Stock</string>
     <string name="dialog_hint">Symbol (e.g. GOOG)</string>
     <string name="dialog_cancel">Cancel</string>
