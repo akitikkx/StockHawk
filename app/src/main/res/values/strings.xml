@@ -21,7 +21,7 @@
 
     <string name="action_change_units" translatable="false">@string/pref_display_mode_key</string>
 
-    <string name="stock_detail_page_title">%1$s weekly history</string>
+    <string name="stock_detail_page_title">%1$s stock history</string>
 
     <string name="stock_detail_current_info_transition_name" translatable="false">TN_Current_Stocks</string>
 

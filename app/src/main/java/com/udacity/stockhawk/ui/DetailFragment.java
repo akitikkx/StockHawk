@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,7 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.udacity.stockhawk.DateValueFormatter;
 import com.udacity.stockhawk.R;
 import com.udacity.stockhawk.data.Contract;
 import com.udacity.stockhawk.data.PrefUtils;
@@ -63,6 +65,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private DecimalFormat dollarFormat;
     private DecimalFormat dollarFormatWithPlus;
     private DecimalFormat percentageFormat;
+    private Pair<Float, List<Entry>> stockEntryPair;
 
     @Nullable
     @Override
@@ -141,6 +144,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 stockEntries.add(new Entry(stockDates.get(i) - date, stockValues.get(i)));
             }
 
+            // needed to extract the dates for formatting
+            stockEntryPair = new Pair<>(date, stockEntries);
+
             Description lineChartDescription = new Description();
             lineChartDescription.setText(symbol);
 
@@ -149,6 +155,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     }
 
+    /**
+     * Assigns the data for the area above the chart
+     * containing the current stock information for the selected stock item
+     *
+     * @param symbol
+     * @param data
+     */
     private void setCurrentStockDetails(String symbol, Cursor data)
     {
         float rawAbsoluteChange = data.getFloat(Contract.Quote.POSITION_ABSOLUTE_CHANGE);
@@ -171,6 +184,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
+    /**
+     * Generates the chart data and the chart itself
+     *
+     * @param stockEntries
+     * @param description
+     */
     private void generateChart(List<Entry> stockEntries, Description description)
     {
         mLineChart.setDescription(description);
@@ -201,6 +220,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // configuring the x axis
         XAxis xAxisConfig = mLineChart.getXAxis();
         xAxisConfig.setTextColor(chartColor);
+        // format the dates so they are displayed in a readable format
+        xAxisConfig.setValueFormatter(new DateValueFormatter(stockEntryPair.first));
         xAxisConfig.setDrawGridLines(false);
         xAxisConfig.setAxisLineColor(chartColor);
         xAxisConfig.setTextSize(13f);
