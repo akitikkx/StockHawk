@@ -4,4 +4,4 @@ This is Project 3 in Udacity's [Android Developer Nanodegree](https://www.udacit
 
 # Screenshots
 
-![alt text](https://github.com/akitikkx/StockHawk/screenshots/stock_hawk_promo_image.jpg "StockHawk screenshot")
+![alt text](https://github.com/akitikkx/StockHawk/blob/master/screenshots/stock_hawk_promo_image.jpg "StockHawk screenshot")
