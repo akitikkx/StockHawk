@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @BindView(R.id.error)
     TextView error;
     @BindView(R.id.toolbar)
-        Toolbar toolbar;
+    Toolbar toolbar;
     private StockAdapter adapter;
 
     @Override
@@ -101,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     }
 
 
-
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         if (s.equals(getString(R.string.pref_stock_status_key))) {
@@ -121,43 +120,36 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
      */
     private void updateEmptyView() {
         if (adapter.getItemCount() == 0) {
-            TextView tv = (TextView) findViewById(R.id.error);
-            if (null != tv) {
-                // if cursor is empty, why? do we have an invalid location
-                int message = R.string.empty_stock_list;
-                @QuoteSyncJob.StockStatus int stock = PrefUtils.getStockStatus(this);
-                switch (stock) {
-                    case QuoteSyncJob.STOCK_STATUS_SERVER_DOWN:
-                        message = R.string.empty_stock_list_server_down;
-                        break;
-                    case QuoteSyncJob.STOCK_STATUS_INVALID:
-                        message = R.string.empty_stock_list_invalid_stock;
-                        break;
-                    default:
-                        if (!networkUp()) {
-                            message = R.string.empty_stock_list_network_error;
-                        }
-                }
-                tv.setText(message);
-                error.setVisibility(View.VISIBLE);
+
+            // if cursor is empty, why? do we have an invalid location
+            int message = R.string.empty_stock_list;
+            @QuoteSyncJob.StockStatus int stock = PrefUtils.getStockStatus(this);
+            switch (stock) {
+                case QuoteSyncJob.STOCK_STATUS_SERVER_DOWN:
+                    message = R.string.empty_stock_list_server_down;
+                    break;
+                case QuoteSyncJob.STOCK_STATUS_INVALID:
+                    message = R.string.empty_stock_list_invalid_stock;
+                    break;
+                default:
+                    if (!networkUp()) {
+                        message = R.string.empty_stock_list_network_error;
+                    }
             }
+            error.setText(message);
+            error.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public void onRefresh() {
 
-        QuoteSyncJob.syncImmediately(this);
-
-        if (!networkUp() && adapter.getItemCount() == 0) {
-            swipeRefreshLayout.setRefreshing(false);
-            updateEmptyView();
-        } else if (PrefUtils.getStocks(this).size() == 0) {
-            swipeRefreshLayout.setRefreshing(false);
-            error.setText(getString(R.string.error_no_stocks));
-            error.setVisibility(View.VISIBLE);
+        if (networkUp()) {
+            QuoteSyncJob.syncImmediately(this);
         } else {
-            error.setVisibility(View.GONE);
+            swipeRefreshLayout.setRefreshing(false);
+            Toast.makeText(this, R.string.empty_stock_list_network_error, Toast.LENGTH_LONG).show();
+            updateEmptyView();
         }
     }
 
@@ -191,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         swipeRefreshLayout.setRefreshing(false);
+        updateEmptyView();
 
         if (data.getCount() != 0) {
             error.setVisibility(View.GONE);

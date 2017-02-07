@@ -1,5 +1,14 @@
 <resources>
     <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <!-- add stock dialog -->
+    <dimen name="stock_dialog_horizontal_margin">4dp</dimen>
+    <dimen name="stock_dialog_vertical_margin">4dp</dimen>
+
+    <!-- stock detail item -->
+    <dimen name="percentage_change_padding">3dp</dimen>
+    <dimen name="layout_padding">16dp</dimen>
 
     <!-- Collection widget dimens -->
     <dimen name="widget_collection_default_width">250dp</dimen>
@@ -7,5 +16,4 @@
     <dimen name="widget_collection_min_resize_width">220dp</dimen>
     <dimen name="widget_collection_min_resize_height">@dimen/widget_collection_default_height
     </dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
 </resources>
